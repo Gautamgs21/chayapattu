@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover, shrink-to-fit=no">
+    <title>LEDGERLY</title>
+
+    <!-- Main icon for web browsers and Android -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/Gautamgs21/Chaya-Pattu/bbb498f9caab538f9c16a3a2157896c66e0472ce/web-app-manifest-512x512.png">
+
+    <!-- Special icon for iPhone & iPad home screen -->
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Gautamgs21/Chaya-Pattu/bbb498f9caab538f9c16a3a2157896c66e0472ce/apple-touch-icon.png">
+
+    <!-- Makes your app look like a real phone app when saved -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="LEDGERLY">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Aptos+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== CSS Variables & Reset ===== */
+        :root {
+            --primary: #2C6357;
+            --primary-dark: #214b42;
+            --primary-light: #7FBDA9;
+            --success: #2E7D32;
+            --danger: #9C3B31;
+            --warning: #9C7327;
+            --bg: #F5F3EE;
+            --card-bg: #FBFAF6;
+            --text-primary: #182233;
+            --text-secondary: #4b5768;
+            --text-muted: #7b8493;
+            --border: #CBD0C7;
+            --shadow: 0 1px 3px rgba(0,0,0,0.03);
+            --radius: 4px;
+            --radius-sm: 3px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --nav-height: 68px;
+            --header-height: 56px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: "Aptos Serif", -apple-system, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+            width: 100%;
+            max-width: 480px;  /* limits on very large screens */
+            margin: 0 auto;
+            background: var(--bg);
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+        }
+
+        /* ===== Header ===== */
+        .app-header {
+            background: var(--card-bg);
+            padding: 14px 20px;
+            padding-top: calc(12px + env(safe-area-inset-top, 0px));
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            min-height: var(--header-height);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+        .app-header h1 {
+            font-family: 'Aptos Serif', serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+        }
+        .app-header h1 i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .header-actions button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: var(--text-secondary);
+            padding: 6px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .header-actions button:active {
+            background: var(--border);
+        }
+
+        /* ===== Tab Content ===== */
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 16px 20px;
+            padding-bottom: calc(20px + var(--nav-height) + var(--safe-bottom));
+            display: none;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Bottom Navigation ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 6px 0;
+            padding-bottom: calc(6px + var(--safe-bottom));
+            z-index: 30;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05);
+        }
+        .bottom-nav .nav-btn {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            padding: 4px 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+            min-width: 64px;
+        }
+        .bottom-nav .nav-btn i {
+            font-size: 22px;
+            transition: transform 0.2s;
+        }
+        .bottom-nav .nav-btn span {
+            font-size: 10px;
+            letter-spacing: 0.2px;
+        }
+        .bottom-nav .nav-btn.active {
+            color: var(--primary);
+        }
+        .bottom-nav .nav-btn.active i {
+            transform: scale(1.05);
+        }
+        .bottom-nav .nav-btn:active {
+            opacity: 0.6;
+        }
+
+        /* ===== Cards ===== */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--text-muted);
+        }
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+            display: block;
+        }
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* ===== Dashboard ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .stat-item {
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            padding: 14px 10px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .stat-item .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .stat-item .stat-label {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        .stat-item .stat-value.positive { color: var(--success); }
+        .stat-item .stat-value.negative { color: var(--danger); }
+        .stat-item .stat-value.neutral { color: var(--text-secondary); }
+
+        .member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+        .member-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .member-name {
+            font-weight: 600;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .member-balance {
+            font-weight: 700;
+            font-size: 16px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+        .member-balance.positive { color: var(--success); }
+        .member-balance.negative { color: var(--danger); }
+        .member-balance.neutral { color: var(--text-muted); }
+        .member-balance .currency { font-size: 12px; font-weight: 500; opacity: 0.6; margin-right: 1px; }
+        .member-status {
+            font-size: 10px;
+            font-weight: 500;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        /* Low credit styles */
+        .member-balance.warning { 
+            color: var(--warning); 
+        }
+        .member-status.low-credit { 
+            background: #EFE3C8; 
+            color: #9C7327; 
+            animation: blinkAlert 1s infinite alternate; 
+        }
+
+        @keyframes blinkAlert {
+            0% { opacity: 1; }
+            100% { opacity: 0.25; }
+        }
+
+        .member-status.credit { background: #DEEAE5; color: #2C6357; }
+        .member-status.debt { background: #F3DEDA; color: #9C3B31; }
+        .member-status.settled { background: var(--border); color: var(--text-muted); }
+
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .category-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+        }
+        .category-row .cat-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .category-row .cat-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .category-row .cat-amount {
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .category-row .cat-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            min-width: 40px;
+        }
+        .category-row .cat-bar .fill {
+            height: 100%;
+            border-radius: 4px;
+            background: var(--primary);
+            transition: width 0.6s ease;
+        }
+
+        /* ===== Transaction Sub-Tabs ===== */
+        .sub-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .sub-tabs .sub-tab {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-align: center;
+        }
+        .sub-tabs .sub-tab.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+        .sub-tabs .sub-tab:active {
+            transform: scale(0.96);
+        }
+
+        .sub-view {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .sub-view.active {
+            display: block;
+        }
+
+        /* ===== Bulk Entry Table ===== */
+        .bulk-table-wrap {
+            overflow-x: auto;
+            margin-top: 8px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            -webkit-overflow-scrolling: touch;
+        }
+        .bulk-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .bulk-table th {
+            background: var(--bg);
+            padding: 8px 6px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+        .bulk-table td {
+            padding: 6px 4px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .bulk-table tr:last-child td {
+            border-bottom: none;
+        }
+        .bulk-table .member-name-cell {
+            font-weight: 500;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .bulk-table input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .bulk-table select, .bulk-table input[type="number"], .bulk-table input[type="text"] {
+            width: 100%;
+            padding: 6px 4px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            min-width: 50px;
+            font-family: inherit;
+        }
+        .bulk-table select:focus, .bulk-table input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(156, 115, 39, 0.15);
+        }
+        .bulk-table .amount-input {
+            width: 70px;
+            min-width: 60px;
+        }
+        .bulk-table .cat-select {
+            min-width: 70px;
+        }
+        .bulk-table .notes-input {
+            min-width: 80px;
+        }
+
+        /* ===== Single Entry Form ===== */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .form-group label .required { color: var(--danger); }
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-family: inherit;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(156, 115, 39, 0.15);
+        }
+        .form-control::placeholder { color: var(--text-muted); }
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394A3B8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-row .form-group { margin-bottom: 0; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+            width: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:active { background: var(--primary-dark); }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:active { background: #256428; }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:active { background: #9C3B31; }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:active { background: var(--bg); }
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 13px;
+            width: auto;
+        }
+
+        .type-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .type-toggle .toggle-btn {
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--card-bg);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            color: var(--text-secondary);
+            font-family: inherit;
+        }
+        .type-toggle .toggle-btn i { margin-right: 6px; }
+        .type-toggle .toggle-btn.active-debit {
+            border-color: var(--danger);
+            background: #F3DEDA;
+            color: var(--danger);
+        }
+        .type-toggle .toggle-btn.active-credit {
+            border-color: var(--success);
+            background: #DEEAE5;
+            color: var(--success);
+        }
+        .type-toggle .toggle-btn:active { transform: scale(0.96); }
+
+        .category-other-input {
+            margin-top: 8px;
+            display: none;
+        }
+        .category-other-input.show { display: block; animation: fadeIn 0.2s ease; }
+
+        /* ===== Settings ===== */
+        .settings-member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .settings-member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--card-bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .settings-member-item .name {
+            font-weight: 500;
+            font-size: 15px;
+        }
+        .settings-member-item .del-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .settings-member-item .del-btn:active {
+            background: #F3DEDA;
+            color: var(--danger);
+        }
+        .settings-add-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .settings-add-form .form-control { flex: 1; }
+        .settings-add-form .btn {
+            width: auto;
+            flex-shrink: 0;
+            padding: 12px 18px;
+        }
+
+        /* ===== Toast ===== */
+        .toast-container {
+            position: fixed;
+            top: calc(20px + env(safe-area-inset-top, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 440px;
+            z-index: 10000;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-weight: 500;
+            font-size: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            animation: slideDown 0.35s ease;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(8px);
+        }
+        .toast i { font-size: 18px; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--primary); }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes slideUp {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-20px) scale(0.95); }
+        }
+        .toast.removing { animation: slideUp 0.25s ease forwards; }
+
+        /* ===== Scrollbar ===== */
+        .tab-content::-webkit-scrollbar { width: 3px; }
+        .tab-content::-webkit-scrollbar-track { background: transparent; }
+        .tab-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .stat-item .stat-value { font-size: 17px; }
+            .form-row { grid-template-columns: 1fr; gap: 12px; }
+            .settings-add-form { flex-direction: column; }
+            .settings-add-form .btn { width: 100%; }
+            .member-balance { font-size: 14px; }
+            .member-name { font-size: 14px; }
+            .bulk-table { font-size: 12px; }
+            .bulk-table .amount-input { width: 60px; min-width: 50px; }
+            .bulk-table td, .bulk-table th { padding: 4px 3px; }
+            /* Make the table wrapper scroll horizontally instead of forcing page width */
+            .bulk-table-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* ---- CRITICAL FIX: FULL WIDTH ON PHONE ---- */
+            #app {
+                max-width: 100%;
+                margin: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .bottom-nav {
+                max-width: 100%;
+                left: 0;
+                transform: none;
+                border-radius: 0;
+            }
+        }
+
+        @media (min-width: 481px) {
+            #app { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        }
+
+        /* ===== Monthly Spending Chart ===== */
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 130px;
+            padding-top: 20px;
+            gap: 6px;
+        }
+        .bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+        }
+        .bar-val {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .bar-fill-wrap {
+            width: 100%;
+            max-width: 28px;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            background: var(--bg);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            width: 100%;
+            background: var(--primary);
+            border-radius: 6px;
+            transition: height 0.4s ease;
+        }
+        .bar-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        /* Splash Screen Overlay */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #F5F3EE;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* App Logo - Full Width */
+        #splashScreen img {
+            width: 85%;
+            max-width: 360px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        /* Outer Progress Bar Track */
+        .progress-container {
+            width: 200px;
+            height: 8px;
+            background: #CBD0C7;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        /* Animated Inner Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 100%;
+            background: #9C7327;
+            border-radius: 3px;
+            animation: loadingBar 1.5s infinite linear;
+            transform-origin: left;
+        }
+
+        @keyframes loadingBar {
+            0% { transform: scaleX(0); }
+            50% { transform: scaleX(0.7); }
+            100% { transform: scaleX(1); }
+        }
+
+        /* ===== Utility ===== */
+        .text-center { text-align: center; }
+        .mt-8 { margin-top: 8px; }
+        .mt-12 { margin-top: 12px; }
+        .mb-8 { margin-bottom: 8px; }
+        .flex { display: flex; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .gap-8 { gap: 8px; }
+        .gap-12 { gap: 12px; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* ===== Auth & Modals (added in v2) ===== */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .overlay.show { display: flex; }
+        .overlay.solid { background: var(--bg); backdrop-filter: none; z-index: 2000; }
+        .modal-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 360px;
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin: auto;
+        }
+        .modal-icon {
+            width: 50px; height: 50px;
+            background: var(--primary); color: #fff;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 20px;
+        }
+        .modal-card h2 { font-size: 18px; margin-bottom: 6px; }
+        .modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+        .modal-card .form-group { text-align: left; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+        .pw-wrap { position: relative; }
+        .pw-wrap .form-control { padding-right: 42px; }
+        .pw-toggle {
+            position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: var(--text-muted);
+            padding: 8px 10px; cursor: pointer; font-size: 15px; border-radius: 8px;
+        }
+        .pw-toggle:active { background: var(--border); }
+        .field-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .role-badge {
+            font-size: 10px; font-weight: 600; padding: 1px 8px; border-radius: 10px;
+            background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary);
+            margin-left: 8px; vertical-align: middle;
+        }
+        .role-badge.admin { background: #EEF2FF; border-color: #C7D2FE; color: var(--primary-dark); }
+        .user-chip {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 12px; font-weight: 600; color: var(--text-secondary);
+        }
+        .user-chip .avatar-sm {
+            width: 26px; height: 26px; border-radius: 50%; color: #fff;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+        }
+        .form-row { display: flex; gap: 10px; }
+        .form-row > .form-group { flex: 1; min-width: 0; }
+        .account-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .account-row .who { min-width: 0; }
+        .account-row .who strong { display: block; font-size: 15px; }
+        .account-row .who span { font-size: 12px; color: var(--text-muted); }
+        .hidden { display: none !important; }
+
+        /* ===== SURA THEME OVERRIDES (Suvid-19 look) ===== */
+        body { font-weight: 400; -webkit-font-smoothing: antialiased; }
+        .app-header h1 { font-family: inherit; font-weight: 600; letter-spacing: 0; }
+        .app-header h1 i, .card-title i { color: #9C7327; }
+        .card-title { text-transform: uppercase; letter-spacing: 0.03em; font-size: 12px; font-weight: 500; }
+        .form-control, .bulk-table select, .bulk-table input[type="number"], .bulk-table input[type="text"] {
+            border: 1px solid var(--border); background: var(--bg); }
+        .form-control { padding: 8px 10px; font-size: 14px; }
+        .form-control:focus, .bulk-table select:focus, .bulk-table input:focus {
+            border-color: #9C7327; box-shadow: none; outline: 2px solid #9C7327; outline-offset: 1px; }
+        .form-group label { text-transform: uppercase; letter-spacing: 0.03em; font-size: 12px; font-weight: 500; }
+        .btn { padding: 10px 14px; font-size: 14px; letter-spacing: 0.01em; }
+        .btn-primary, .btn-success { background: #182233; color: #FBFAF6; }
+        .btn-primary:hover:not(:disabled), .btn-success:hover:not(:disabled),
+        .btn-primary:active, .btn-success:active { background: #9C7327; color: #1a1200; }
+        .btn-outline { border: 1px solid var(--border); }
+        .btn-outline:hover:not(:disabled) { border-color: #182233; color: #182233; }
+        .member-avatar, .category-row .cat-icon, .member-status { border-radius: 3px; }
+        .toast { border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .toast.info { background: #182233; }
+        .sub-tabs .sub-tab.active, .bottom-nav .nav-btn.active { color: #2C6357; }
+        .bottom-nav { backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+        .bar-fill { background: #2C6357; }
+        input[type="checkbox"] { accent-color: #9C7327; }
+        .overlay { background: rgba(24, 34, 51, 0.8); }
+        .overlay.solid { background: var(--bg); }
+        .modal-card { border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .modal-icon { background: #182233; border-radius: 4px; }
+        .modal-card h2 { font-weight: 600; }
+        .role-badge { border-radius: 3px; }
+        .role-badge.admin { background: #EFE3C8; border-color: #9C7327; color: #9C7327; }
+        .user-chip .avatar-sm { border-radius: 3px; }
+        .pw-toggle { border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+        <img src="https://raw.githubusercontent.com/Gautamgs21/Chaya-Pattu/bbb498f9caab538f9c16a3a2157896c66e0472ce/web-app-manifest-512x512.png" alt="LEDGERLY logo">
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <p style="font-size: 14px; color: #4b5768; font-weight: 600;">Loading data...</p>
+    </div>
+
+    <!-- ===== FIRST-RUN SETUP (shown only when no users exist) ===== -->
+    <div id="setupOverlay" class="overlay solid">
+        <form class="modal-card" id="setupForm" autocomplete="on">
+            <div class="modal-icon"><i class="fas fa-user-shield"></i></div>
+            <h2>Create admin account</h2>
+            <p class="modal-sub">First-time setup. This account can add and manage everyone else.</p>
+
+            <div class="form-group">
+                <label for="setupName">Full name</label>
+                <input type="text" class="form-control" id="setupName" maxlength="30" autocomplete="name" required>
+            </div>
+            <div class="form-group">
+                <label for="setupUsername">Username</label>
+                <input type="text" class="form-control" id="setupUsername" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+                <div class="field-hint">Letters, numbers, dot, dash or underscore (3–30).</div>
+            </div>
+            <div class="form-group">
+                <label for="setupPassword">Password</label>
+                <div class="pw-wrap">
+                    <input type="password" class="form-control" id="setupPassword" minlength="8" maxlength="72" autocomplete="new-password" required>
+                    <button type="button" class="pw-toggle" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                </div>
+                <div class="field-hint">At least 8 characters.</div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="setupSubmitBtn"><i class="fas fa-check"></i> Create admin &amp; sign in</button>
+        </form>
+    </div>
+
+    <!-- ===== LOGIN ===== -->
+    <div id="loginOverlay" class="overlay solid">
+        <form class="modal-card" id="loginForm" autocomplete="on">
+            <div class="modal-icon"><i class="fas fa-lock"></i></div>
+            <h2>Sign in</h2>
+            <p class="modal-sub" id="loginSub">Enter your username and password to continue.</p>
+
+            <div class="form-group">
+                <label for="loginUsername">Username</label>
+                <input type="text" class="form-control" id="loginUsername" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+            </div>
+            <div class="form-group" style="margin-bottom:20px;">
+                <label for="loginPassword">Password</label>
+                <div class="pw-wrap">
+                    <input type="password" class="form-control" id="loginPassword" maxlength="72" autocomplete="current-password" required>
+                    <button type="button" class="pw-toggle" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="loginSubmitBtn"><i class="fas fa-key"></i> Sign in</button>
+        </form>
+    </div>
+
+    <!-- ===== ADD MEMBER MODAL (admin) ===== -->
+    <div id="addMemberModal" class="overlay">
+        <form class="modal-card" id="addMemberForm" autocomplete="off">
+            <div class="modal-icon"><i class="fas fa-user-plus"></i></div>
+            <h2>Add member</h2>
+            <p class="modal-sub">Creates a login for this person. They can sign in with these details.</p>
+
+            <div class="form-group">
+                <label for="newName">Name</label>
+                <input type="text" class="form-control" id="newName" maxlength="30" required>
+            </div>
+            <div class="form-group">
+                <label for="newUsername">Username</label>
+                <input type="text" class="form-control" id="newUsername" maxlength="30" autocapitalize="none" spellcheck="false" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">Temporary password</label>
+                <div class="pw-wrap">
+                    <input type="password" class="form-control" id="newPassword" minlength="8" maxlength="72" autocomplete="new-password" required>
+                    <button type="button" class="pw-toggle" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                </div>
+                <div class="field-hint">At least 8 characters. They can change it after signing in.</div>
+            </div>
+            <div class="form-group">
+                <label for="newRole">Role</label>
+                <select class="form-control" id="newRole">
+                    <option value="user">Member</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" data-close="addMemberModal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="addMemberSubmitBtn">Add member</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ===== EDIT MEMBER MODAL (admin) ===== -->
+    <div id="editMemberModal" class="overlay">
+        <form class="modal-card" id="editMemberForm" autocomplete="off">
+            <div class="modal-icon"><i class="fas fa-user-edit"></i></div>
+            <h2>Edit member</h2>
+            <p class="modal-sub" id="editMemberSub"></p>
+            <input type="hidden" id="editId">
+
+            <div class="form-group">
+                <label for="editName">Name</label>
+                <input type="text" class="form-control" id="editName" maxlength="30" required>
+            </div>
+            <div class="form-group" id="editRoleGroup">
+                <label for="editRole">Role</label>
+                <select class="form-control" id="editRole">
+                    <option value="user">Member</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editPassword">Reset password <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+                <div class="pw-wrap">
+                    <input type="password" class="form-control" id="editPassword" minlength="8" maxlength="72" placeholder="Leave blank to keep current" autocomplete="new-password">
+                    <button type="button" class="pw-toggle" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" data-close="editMemberModal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="editMemberSubmitBtn">Save changes</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ===== CHANGE MY PASSWORD MODAL ===== -->
+    <div id="passwordModal" class="overlay">
+        <form class="modal-card" id="passwordForm" autocomplete="off">
+            <div class="modal-icon"><i class="fas fa-key"></i></div>
+            <h2>Change password</h2>
+            <p class="modal-sub">You'll stay signed in on this device.</p>
+
+            <div class="form-group">
+                <label for="pwCurrent">Current password</label>
+                <div class="pw-wrap">
+                    <input type="password" class="form-control" id="pwCurrent" maxlength="72" autocomplete="current-password" required>
+                    <button type="button" class="pw-toggle" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="pwNew">New password</label>
+                <div class="pw-wrap">
+                    <input type="password" class="form-control" id="pwNew" minlength="8" maxlength="72" autocomplete="new-password" required>
+                    <button type="button" class="pw-toggle" aria-label="Show password"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="pwConfirm">Confirm new password</label>
+                <input type="password" class="form-control" id="pwConfirm" minlength="8" maxlength="72" autocomplete="new-password" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" data-close="passwordModal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="passwordSubmitBtn">Update password</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="app">
+        <!-- ===== HEADER ===== -->
+        <header class="app-header">
+            <h1><i class="fas fa-mug-hot"></i> LEDGERLY</h1>
+            <div class="header-actions">
+                <div class="user-chip" id="userChip"></div>
+                <button id="refreshBtn" title="Refresh" aria-label="Refresh"><i class="fas fa-sync"></i></button>
+                <button id="logoutBtn" title="Sign out" aria-label="Sign out"><i class="fas fa-right-from-bracket"></i></button>
+            </div>
+        </header>
+
+        <!-- ===== TAB: DASHBOARD ===== -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-item">
+                    <div class="stat-value negative" id="statTotalDebt">₹0</div>
+                    <div class="stat-label">Total Debt</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value positive" id="statTotalCredit">₹0</div>
+                    <div class="stat-label">Total Credit</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value neutral" id="statNet">₹0</div>
+                    <div class="stat-label">Net Balance</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title flex-between">
+                    <span><i class="fas fa-users"></i> Balances</span>
+                    <button class="btn btn-outline btn-sm" id="copyBalancesBtn" style="width:auto;padding:4px 10px;font-size:12px;">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <div id="memberListContainer">
+                    <div class="empty-state">
+                        <i class="fas fa-user-plus"></i>
+                        <p>No members yet. Add some in Settings.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-chart-pie"></i> Spending by Category</div>
+                <div id="categoryContainer">
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <p>No transactions yet.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title flex-between">
+                    <span><i class="fas fa-chart-column"></i> Spending Analytics</span>
+                    <select class="form-control" id="monthlyMemberSelect" style="width:auto;padding:4px 8px;font-size:12px;">
+                        <option value="ALL">ALL</option>
+                    </select>
+                </div>
+                <div id="monthlyChartContainer" style="margin-top:8px;">
+                    <div class="empty-state" style="padding:16px 0;">
+                        <p style="font-size:13px;">Loading spending data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: NEW TRANSACTION ===== -->
+        <div id="tab-transaction" class="tab-content">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-pen"></i> Register Transaction</div>
+
+                <div class="sub-tabs">
+                    <button class="sub-tab active" data-view="bulk"><i class="fas fa-table"></i> Bulk Entry</button>
+                    <button class="sub-tab" data-view="single"><i class="fas fa-user"></i> Single Entry</button>
+                </div>
+
+                <!-- ===== BULK ENTRY VIEW ===== -->
+                <div id="bulk-entry" class="sub-view active">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" class="form-control" id="bulkDate">
+                    </div>
+
+                    <div id="bulkTotalSummary" style="background: var(--card-bg); padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 12px; font-weight: 600; font-size: 14px; text-align: center; box-shadow: var(--shadow);">
+                        Your Net Spending is <span id="bulkNetTotal" style="color: var(--primary); font-weight: 700; font-size: 16px;">₹0</span>
+                    </div>
+
+                    <div class="bulk-table-wrap">
+                        <table class="bulk-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:36px;"><input type="checkbox" id="selectAllBulk"></th>
+                                    <th style="min-width:80px;">Member</th>
+                                    <th style="width:90px;">Type</th>
+                                    <th style="width:90px;">Amount</th>
+                                    <th style="min-width:110px;">Category</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bulkTableBody">
+                                <tr><td colspan="5" class="text-center" style="padding:20px;color:var(--text-muted);">Loading members...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-group mt-12">
+                        <label>Notes <span style="font-weight:400;color:var(--text-muted);">(optional - applies to all selected)</span></label>
+                        <input type="text" class="form-control" id="bulkCommonNotes" placeholder="Any additional info for all entries..." maxlength="100">
+                    </div>
+
+                    <button class="btn btn-success mt-8" id="submitBulkBtn">
+                        <i class="fas fa-check-circle"></i> Add Selected Transactions
+                    </button>
+                </div>
+
+                <!-- ===== SINGLE ENTRY VIEW ===== -->
+                <div id="single-entry" class="sub-view">
+                    <form id="transactionForm" autocomplete="off">
+                        <div class="form-group">
+                            <label>Person <span class="required">*</span></label>
+                            <select class="form-control" id="txPerson" required>
+                                <option value="">Select person...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Type <span class="required">*</span></label>
+                            <div class="type-toggle">
+                                <button type="button" class="toggle-btn active-debit" id="typeDebitBtn" data-value="Debit">
+                                    <i class="fas fa-arrow-down"></i> Debit
+                                </button>
+                                <button type="button" class="toggle-btn" id="typeCreditBtn" data-value="Credit">
+                                    <i class="fas fa-arrow-up"></i> Credit
+                                </button>
+                            </div>
+                            <input type="hidden" id="txType" value="Debit">
+                        </div>
+
+                        <div class="form-group" id="categoryGroup">
+                            <label>Category <span class="required">*</span></label>
+                            <select class="form-control" id="txCategory">
+                                <option value="Tea">☕ Tea</option>
+                                <option value="Snacks">🍿 Snacks</option>
+                                <option value="Travel">🚌 Travel</option>
+                                <option value="Food">🍽️ Food</option>
+                                <option value="Others">📌 Others</option>
+                            </select>
+                            <div class="category-other-input" id="otherCategoryWrapper">
+                                <input type="text" class="form-control" id="txOtherCategory" placeholder="Enter custom category..." maxlength="30">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Amount (₹) <span class="required">*</span></label>
+                            <input type="number" class="form-control" id="txAmount" placeholder="0.00" min="0.01" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" class="form-control" id="txDate">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notes <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+                            <input type="text" class="form-control" id="txNotes" placeholder="Any additional info..." maxlength="100">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="submitTxBtn">
+                            <i class="fas fa-plus-circle"></i> Add Transaction
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: SETTINGS ===== -->
+        <div id="tab-settings" class="tab-content">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-circle-user"></i> My Account</div>
+                <div class="account-row">
+                    <div class="who">
+                        <strong id="accName">—</strong>
+                        <span id="accMeta"></span>
+                    </div>
+                    <button class="btn btn-outline btn-sm" id="openPasswordBtn" style="width:auto;padding:6px 12px;font-size:12px;">
+                        <i class="fas fa-key"></i> Change password
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title flex-between">
+                    <span><i class="fas fa-user-cog"></i> Members</span>
+                    <button class="btn btn-primary btn-sm admin-only hidden" id="openAddMemberBtn" style="width:auto;padding:6px 12px;font-size:12px;">
+                        <i class="fas fa-plus"></i> Add member
+                    </button>
+                </div>
+                <div id="settingsMemberList">
+                    <div class="empty-state" style="padding:16px 0;">
+                        <p style="font-size:13px;">No members added yet.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-only hidden" style="padding:4px 4px 8px;font-size:12px;color:var(--text-muted);text-align:center;">
+                <i class="fas fa-trash-alt"></i> Removing a member keeps their past transactions
+            </div>
+        </div>
+
+        <!-- ===== TAB: HISTORY ===== -->
+        <div id="tab-history" class="tab-content">
+            <div class="card">
+                <div class="card-title flex-between">
+                    <span><i class="fas fa-clock-rotate-left"></i> Transaction History</span>
+                    <button class="btn btn-outline btn-sm" id="bulkDeleteModeBtn" style="width:auto;padding:4px 10px;font-size:12px;">
+                        <i class="fas fa-trash-alt"></i> Delete Bulk
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end;">
+                    <div style="flex:1;min-width:120px;">
+                        <label style="font-size:12px;color:var(--text-muted);">Person</label>
+                        <select class="form-control" id="filterPerson" style="padding:6px 10px;font-size:13px;">
+                            <option value="">All</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;min-width:120px;">
+                        <label style="font-size:12px;color:var(--text-muted);">Date</label>
+                        <input type="date" class="form-control" id="filterDate" style="padding:6px 10px;font-size:13px;">
+                    </div>
+                    <div>
+                        <button class="btn btn-outline btn-sm" id="resetFilterBtn" style="padding:7px 16px;height:35px;"><i class="fas fa-rotate-left"></i> Reset</button>
+                    </div>
+                </div>
+
+                <!-- Bulk Action Controls -->
+                <div id="historyBulkToolbar" style="display:none;background:var(--bg);padding:12px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+                        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;user-select:none;">
+                            <input type="checkbox" id="selectAllHistoryBulk" style="width:18px;height:18px;accent-color:var(--danger);cursor:pointer;">
+                            Select All
+                        </label>
+                        <div id="bulkSelectionCount" style="font-weight:600;font-size:13px;color:var(--text-secondary);">
+                            0 entries selected for deletion
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;justify-content:center;">
+                        <button class="btn btn-danger btn-sm" id="confirmHistoryBulkDeleteBtn" style="width:auto;padding:6px 16px;" disabled>
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        <button class="btn btn-outline btn-sm" id="cancelHistoryBulkDeleteBtn" style="width:auto;padding:6px 16px;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <div id="historyContainer">
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <p>No transactions yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== BOTTOM NAV ===== -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-tab="dashboard" aria-label="Dashboard">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-btn" data-tab="transaction" aria-label="New Transaction">
+                <i class="fas fa-plus-circle"></i>
+                <span>New</span>
+            </button>
+            <button class="nav-btn" data-tab="history" aria-label="History">
+                <i class="fas fa-clock-rotate-left"></i>
+                <span>History</span>
+            </button>
+            <button class="nav-btn" data-tab="settings" aria-label="Settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+        </nav>
+
+        <!-- ===== TOAST CONTAINER ===== -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  LEDGERLY v2 — talks to a REST API (/api/...) backed by MongoDB.
+        //  Auth uses an httpOnly session cookie set by the server, so no
+        //  tokens or passwords are ever stored in the browser.
+        // ============================================================
+        const API_BASE = '/api';
+
+        // ---------- Global state ----------
+        let currentTab = 'dashboard';
+        let currentUser = null;          // { id, name, username, role }
+        let members = [];                // [{ id, name, username, role }]
+        let dashboardData = null;
+        let isBulkDeleteMode = false;
+        let selectedTxIds = new Set();
+        let currentHistoryData = [];
+
+        const CATEGORY_ICONS = {
+            'Tea': 'fa-mug-saucer', 'Snacks': 'fa-utensils', 'Travel': 'fa-bus',
+            'Food': 'fa-utensils', 'Others': 'fa-ellipsis'
+        };
+        const CATEGORY_COLORS = {
+            'Tea': '#2C6357', 'Snacks': '#9C7327', 'Travel': '#4b5768',
+            'Food': '#9C3B31', 'Others': '#7b8493'
+        };
+
+        // ---------- DOM refs ----------
+        const $ = (sel) => document.querySelector(sel);
+        const $$ = (sel) => document.querySelectorAll(sel);
+
+        const tabs = {
+            dashboard: $('#tab-dashboard'),
+            transaction: $('#tab-transaction'),
+            history: $('#tab-history'),
+            settings: $('#tab-settings'),
+        };
+        const navBtns = $$('.nav-btn');
+        const memberListContainer = $('#memberListContainer');
+        const categoryContainer = $('#categoryContainer');
+        const statTotalDebt = $('#statTotalDebt');
+        const statTotalCredit = $('#statTotalCredit');
+        const statNet = $('#statNet');
+        const subTabBtns = $$('.sub-tab');
+        const bulkView = $('#bulk-entry');
+        const singleView = $('#single-entry');
+        const bulkDate = $('#bulkDate');
+        const bulkTableBody = $('#bulkTableBody');
+        const selectAllBulk = $('#selectAllBulk');
+        const submitBulkBtn = $('#submitBulkBtn');
+        const txForm = $('#transactionForm');
+        const txPerson = $('#txPerson');
+        const txType = $('#txType');
+        const typeDebitBtn = $('#typeDebitBtn');
+        const typeCreditBtn = $('#typeCreditBtn');
+        const txCategory = $('#txCategory');
+        const txOtherCategory = $('#txOtherCategory');
+        const otherCategoryWrapper = $('#otherCategoryWrapper');
+        const txAmount = $('#txAmount');
+        const txDate = $('#txDate');
+        const txNotes = $('#txNotes');
+        const submitBtn = $('#submitTxBtn');
+        const settingsMemberList = $('#settingsMemberList');
+        const toastContainer = $('#toastContainer');
+        const historyContainer = $('#historyContainer');
+        const filterPerson = $('#filterPerson');
+        const filterDate = $('#filterDate');
+        const resetFilterBtn = $('#resetFilterBtn');
+        const bulkDeleteModeBtn = $('#bulkDeleteModeBtn');
+        const historyBulkToolbar = $('#historyBulkToolbar');
+        const bulkSelectionCount = $('#bulkSelectionCount');
+        const selectAllHistoryBulk = $('#selectAllHistoryBulk');
+        const confirmHistoryBulkDeleteBtn = $('#confirmHistoryBulkDeleteBtn');
+        const cancelHistoryBulkDeleteBtn = $('#cancelHistoryBulkDeleteBtn');
+
+        // ============================================================
+        //  UTILITIES
+        // ============================================================
+        function getTodayStr() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function getColorForName(name) {
+            const colors = ['#182233', '#2C6357', '#9C7327', '#4b5768'];
+            let hash = 0;
+            const s = String(name || '');
+            for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        function formatDate(ymd) {
+            if (!ymd || !/^\d{4}-\d{2}-\d{2}/.test(ymd)) return 'No date';
+            const [y, m, d] = ymd.slice(0, 10).split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function isAdmin() { return !!currentUser && currentUser.role === 'admin'; }
+
+        function setBusy(btn, busy, busyHtml) {
+            if (!btn) return;
+            if (busy) {
+                btn.dataset.html = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = busyHtml || '<i class="fas fa-spinner fa-spin"></i> Please wait...';
+            } else {
+                btn.disabled = false;
+                if (btn.dataset.html) btn.innerHTML = btn.dataset.html;
+            }
+        }
+
+        // ============================================================
+        //  TOAST
+        // ============================================================
+        function showToast(message, type = 'info', duration = 2800) {
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = document.createElement('i');
+            icon.className = `fas ${icons[type] || icons.info}`;
+            toast.appendChild(icon);
+            toast.appendChild(document.createTextNode(' ' + message));   // text node: no HTML injection
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ============================================================
+        //  API CLIENT
+        // ============================================================
+        class ApiError extends Error {
+            constructor(message, status) { super(message); this.status = status; }
+        }
+
+        async function api(method, path, body) {
+            let res;
+            try {
+                res = await fetch(API_BASE + path, {
+                    method,
+                    credentials: 'same-origin',
+                    headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
+                    body: body !== undefined ? JSON.stringify(body) : undefined
+                });
+            } catch (e) {
+                throw new ApiError('Cannot reach the server. Check your connection.', 0);
+            }
+            let data = null;
+            try { data = await res.json(); } catch (e) { /* empty body */ }
+
+            if (!res.ok) {
+                // Session expired / not signed in (but not for the login call itself)
+                if (res.status === 401 && !path.startsWith('/auth/login') && !path.startsWith('/auth/me')) {
+                    handleSignedOut('Your session expired. Please sign in again.');
+                }
+                throw new ApiError((data && data.message) || 'Something went wrong. Please try again.', res.status);
+            }
+            return data;
+        }
+
+        // Show an error toast for any failed call; returns undefined on failure
+        async function safe(promise) {
+            try { return await promise; }
+            catch (err) {
+                if (!(err instanceof ApiError && err.status === 401)) showToast(err.message || 'Something went wrong.', 'error');
+                return undefined;
+            }
+        }
+
+        // ============================================================
+        //  AUTH FLOW
+        // ============================================================
+        function showOverlay(id) { $('#' + id).classList.add('show'); }
+        function hideOverlay(id) { $('#' + id).classList.remove('show'); }
+        function hideSplash() { const s = $('#splashScreen'); if (s) s.style.display = 'none'; }
+
+        async function boot() {
+            try {
+                const me = await api('GET', '/auth/me');
+                if (me.setupRequired) {
+                    showOverlay('setupOverlay');
+                } else if (me.authenticated && me.user) {
+                    enterApp(me.user);
+                } else {
+                    showOverlay('loginOverlay');
+                }
+            } catch (err) {
+                $('#loginSub').textContent = err.message;
+                showOverlay('loginOverlay');
+            }
+            hideSplash();
+        }
+
+        function enterApp(user) {
+            currentUser = user;
+            hideOverlay('loginOverlay');
+            hideOverlay('setupOverlay');
+
+            // User chip in header
+            const chip = $('#userChip');
+            chip.innerHTML = `<div class="avatar-sm" style="background:${getColorForName(user.name)}">${escapeHtml(user.name.charAt(0).toUpperCase())}</div>`;
+            chip.title = `${user.name} (${user.role})`;
+
+            // Account card + admin-only controls
+            $('#accName').textContent = user.name;
+            $('#accMeta').textContent = `@${user.username} · ${user.role === 'admin' ? 'Admin' : 'Member'}`;
+            $$('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin()));
+
+            switchTab('dashboard', true);
+            loadAll();
+            showToast(`Welcome, ${user.name}!`, 'success', 1800);
+        }
+
+        function handleSignedOut(message) {
+            currentUser = null;
+            members = [];
+            dashboardData = null;
+            if (isBulkDeleteMode) exitHistoryBulkMode();
+            ['addMemberModal', 'editMemberModal', 'passwordModal'].forEach(hideOverlay);
+            $('#loginPassword').value = '';
+            $('#loginSub').textContent = message || 'Enter your username and password to continue.';
+            showOverlay('loginOverlay');
+        }
+
+        $('#loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = $('#loginSubmitBtn');
+            const username = $('#loginUsername').value.trim().toLowerCase();
+            const password = $('#loginPassword').value;
+            if (!username || !password) { showToast('Enter your username and password.', 'error'); return; }
+            setBusy(btn, true, '<i class="fas fa-spinner fa-spin"></i> Signing in...');
+            const res = await safe(api('POST', '/auth/login', { username, password }));
+            setBusy(btn, false);
+            if (res && res.user) {
+                $('#loginPassword').value = '';
+                enterApp(res.user);
+            }
+        });
+
+        $('#setupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = $('#setupSubmitBtn');
+            const name = $('#setupName').value.trim();
+            const username = $('#setupUsername').value.trim().toLowerCase();
+            const password = $('#setupPassword').value;
+            if (!validUsername(username)) { showToast('Username: 3–30 letters, numbers, dot, dash or underscore.', 'error'); return; }
+            if (password.length < 8) { showToast('Password must be at least 8 characters.', 'error'); return; }
+            setBusy(btn, true, '<i class="fas fa-spinner fa-spin"></i> Creating...');
+            const res = await safe(api('POST', '/auth/setup', { name, username, password }));
+            setBusy(btn, false);
+            if (res && res.user) {
+                $('#setupPassword').value = '';
+                enterApp(res.user);
+            }
+        });
+
+        $('#logoutBtn').addEventListener('click', async () => {
+            await safe(api('POST', '/auth/logout'));
+            handleSignedOut('You have been signed out.');
+        });
+
+        function validUsername(u) { return /^[a-z0-9._-]{3,30}$/.test(u); }
+
+        // Show / hide password buttons
+        document.addEventListener('click', (e) => {
+            const t = e.target.closest('.pw-toggle');
+            if (!t) return;
+            const input = t.parentElement.querySelector('input');
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            t.innerHTML = `<i class="fas ${show ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+            t.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        });
+
+        // Generic modal close buttons
+        document.addEventListener('click', (e) => {
+            const c = e.target.closest('[data-close]');
+            if (c) hideOverlay(c.dataset.close);
+        });
+
+        // ============================================================
+        //  DATA LOADING
+        // ============================================================
+        async function loadMembers() {
+            const data = await safe(api('GET', '/members'));
+            if (!data) return;
+            members = data;
+            populateMemberDropdowns();
+            renderBulkTable();
+            renderSettingsMembers();
+            populateFilterDropdown();
+            populateMonthlyMemberDropdown();
+        }
+
+        async function fetchDashboard() {
+            const data = await safe(api('GET', '/dashboard'));
+            if (!data) return;
+            dashboardData = data;
+            renderDashboard(data);
+        }
+
+        async function loadAll() {
+            await Promise.all([loadMembers(), fetchDashboard()]);
+        }
+
+        // ============================================================
+        //  RENDER: DASHBOARD
+        // ============================================================
+        function renderDashboard(data) {
+            if (!data) return;
+            const totalDebt = data.summary.totalDebit || 0;
+            const totalCredit = data.summary.totalCredit || 0;
+            const net = data.summary.netBalance || 0;
+
+            statTotalDebt.textContent = `₹${totalDebt.toFixed(0)}`;
+            statTotalCredit.textContent = `₹${totalCredit.toFixed(0)}`;
+            statNet.textContent = `₹${net.toFixed(0)}`;
+            statNet.className = 'stat-value ' + (net > 0 ? 'positive' : net < 0 ? 'negative' : 'neutral');
+
+            if (data.members.length === 0) {
+                memberListContainer.innerHTML = `<div class="empty-state"><i class="fas fa-user-plus"></i><p>No members yet. Add some in Settings.</p></div>`;
+            } else {
+                let html = '<div class="member-list">';
+                data.members.forEach(m => {
+                    const bal = m.balance || 0;
+                    const isLowCredit = (bal > 0 && bal <= 50);
+                    const statusClass = bal > 0 ? (isLowCredit ? 'low-credit' : 'credit') : (bal < 0 ? 'debt' : 'settled');
+                    const statusLabel = bal > 0 ? 'Credit' : bal < 0 ? 'Debt' : 'Settled';
+                    const balanceClass = bal > 0 ? (isLowCredit ? 'warning' : 'positive') : (bal < 0 ? 'negative' : 'neutral');
+                    const sign = bal > 0 ? '+' : '';
+                    html += `
+                        <div class="member-item">
+                            <div class="member-info">
+                                <div class="member-avatar" style="background:${getColorForName(m.name)}">${escapeHtml(m.name.charAt(0).toUpperCase())}</div>
+                                <span class="member-name">${escapeHtml(m.name)}</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span class="member-balance ${balanceClass}">
+                                    <span class="currency">₹</span>${sign}${Math.abs(bal).toFixed(0)}
+                                </span>
+                                <span class="member-status ${statusClass}">${statusLabel}</span>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                memberListContainer.innerHTML = html;
+            }
+
+            if (data.categories.length === 0) {
+                categoryContainer.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>No transactions yet.</p></div>`;
+            } else {
+                const total = data.categories.reduce((s, c) => s + c.amount, 0);
+                let html = '<div class="category-list">';
+                data.categories.forEach(c => {
+                    const pct = total > 0 ? (c.amount / total * 100) : 0;
+                    const icon = CATEGORY_ICONS[c.category] || 'fa-tag';
+                    const color = CATEGORY_COLORS[c.category] || '#7b8493';
+                    html += `
+                        <div class="category-row">
+                            <div class="cat-icon" style="background:${color}"><i class="fas ${icon}"></i></div>
+                            <span class="cat-name">${escapeHtml(c.category)}</span>
+                            <span class="cat-amount">₹${c.amount.toFixed(0)}</span>
+                            <div class="cat-bar"><div class="fill" style="width:${pct}%;background:${color}"></div></div>
+                        </div>`;
+                });
+                html += '</div>';
+                categoryContainer.innerHTML = html;
+            }
+            populateMonthlyMemberDropdown();
+            renderMonthlyChart();
+        }
+
+        function populateMonthlyMemberDropdown() {
+            const select = $('#monthlyMemberSelect');
+            if (!select) return;
+            const currentVal = select.value;
+            let html = '<option value="ALL">ALL</option>';
+            members.forEach(m => { html += `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`; });
+            select.innerHTML = html;
+            if (currentVal && (currentVal === 'ALL' || members.some(m => m.name === currentVal))) select.value = currentVal;
+        }
+
+        function renderMonthlyChart() {
+            const container = $('#monthlyChartContainer');
+            const select = $('#monthlyMemberSelect');
+            if (!container || !dashboardData || !dashboardData.monthly) return;
+
+            const selected = select ? select.value : 'ALL';
+            const monthsList = dashboardData.monthly.monthsList || [];
+            const memberData = dashboardData.monthly.data[selected] || {};
+
+            let maxVal = 0;
+            monthsList.forEach(m => { const v = memberData[m.key] || 0; if (v > maxVal) maxVal = v; });
+
+            let html = '<div class="chart-bars">';
+            monthsList.forEach(m => {
+                const val = memberData[m.key] || 0;
+                const pct = maxVal > 0 ? (val / maxVal * 100) : 0;
+                html += `
+                    <div class="bar-col">
+                        <span class="bar-val">₹${val.toFixed(0)}</span>
+                        <div class="bar-fill-wrap"><div class="bar-fill" style="height:${pct}%;"></div></div>
+                        <span class="bar-lbl">${escapeHtml(m.label)}</span>
+                    </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        $('#monthlyMemberSelect').addEventListener('change', renderMonthlyChart);
+
+        // ============================================================
+        //  DROPDOWNS
+        // ============================================================
+        function populateMemberDropdowns() {
+            const currentVal = txPerson.value;
+            let html = '<option value="">Select person...</option>';
+            members.forEach(m => { html += `<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`; });
+            txPerson.innerHTML = html;
+            if (currentVal && members.some(m => m.id === currentVal)) txPerson.value = currentVal;
+        }
+
+        function populateFilterDropdown() {
+            const currentVal = filterPerson.value;
+            let html = '<option value="">All</option>';
+            members.forEach(m => { html += `<option value="${escapeHtml(m.id)}">${escapeHtml(m.name)}</option>`; });
+            filterPerson.innerHTML = html;
+            if (currentVal && members.some(m => m.id === currentVal)) filterPerson.value = currentVal;
+        }
+
+        // ============================================================
+        //  BULK ENTRY TABLE
+        // ============================================================
+        function updateBulkTotal() {
+            let totalDebit = 0, totalCredit = 0;
+            $$('#bulkTableBody tr').forEach(row => {
+                const cb = row.querySelector('.bulk-checkbox');
+                if (!cb || !cb.checked) return;
+                const type = row.querySelector('.bulk-type').value;
+                const amount = parseFloat(row.querySelector('.bulk-amount').value) || 0;
+                if (type === 'Debit') totalDebit += amount; else totalCredit += amount;
+            });
+            const net = totalDebit - totalCredit;
+            const el = $('#bulkNetTotal');
+            if (el) {
+                el.textContent = `${net < 0 ? '-' : ''}₹${Math.abs(net).toFixed(0)}`;
+                el.style.color = net > 0 ? 'var(--danger)' : net < 0 ? 'var(--success)' : 'var(--primary)';
+            }
+        }
+
+        function renderBulkTable() {
+            if (!members || members.length === 0) {
+                bulkTableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding:20px;color:var(--text-muted);">No members. Add them in Settings.</td></tr>`;
+                updateBulkTotal();
+                return;
+            }
+            let html = '';
+            members.forEach(m => {
+                html += `
+                    <tr data-id="${escapeHtml(m.id)}">
+                        <td style="text-align:center;"><input type="checkbox" class="bulk-checkbox" checked></td>
+                        <td class="member-name-cell">${escapeHtml(m.name)}</td>
+                        <td>
+                            <select class="bulk-type">
+                                <option value="Debit">Debit</option>
+                                <option value="Credit">Credit</option>
+                            </select>
+                        </td>
+                        <td><input type="number" class="form-control amount-input bulk-amount" placeholder="0" min="0.01" step="0.01"></td>
+                        <td>
+                            <select class="form-control cat-select bulk-cat">
+                                <option value="Tea">☕ Tea</option>
+                                <option value="Snacks">🍿 Snacks</option>
+                                <option value="Travel">🚌 Travel</option>
+                                <option value="Food">🍽️ Food</option>
+                                <option value="Top Up">💰 Top Up</option>
+                                <option value="Others">📌 Others</option>
+                            </select>
+                        </td>
+                    </tr>`;
+            });
+            bulkTableBody.innerHTML = html;
+            updateSelectAllState();
+
+            selectAllBulk.onchange = function () {
+                $$('.bulk-checkbox').forEach(cb => cb.checked = this.checked);
+                updateBulkTotal();
+            };
+            $$('.bulk-checkbox').forEach(cb => {
+                cb.onchange = () => { updateSelectAllState(); updateBulkTotal(); };
+            });
+            $$('.bulk-amount, .bulk-type').forEach(el => {
+                el.addEventListener('input', updateBulkTotal);
+                el.addEventListener('change', updateBulkTotal);
+            });
+            updateBulkTotal();
+        }
+
+        function updateSelectAllState() {
+            const all = $$('.bulk-checkbox');
+            const checked = $$('.bulk-checkbox:checked');
+            if (all.length === 0) return;
+            selectAllBulk.checked = (checked.length === all.length);
+            selectAllBulk.indeterminate = (checked.length > 0 && checked.length < all.length);
+        }
+
+        async function submitBulk() {
+            const commonNotesInput = $('#bulkCommonNotes');
+            const commonNotes = commonNotesInput ? commonNotesInput.value.trim() : '';
+            const date = bulkDate.value || getTodayStr();
+            const transactions = [];
+            let hasError = false;
+
+            $$('#bulkTableBody tr').forEach(row => {
+                const cb = row.querySelector('.bulk-checkbox');
+                if (!cb || !cb.checked) return;
+                const amountEl = row.querySelector('.bulk-amount');
+                const amount = parseFloat(amountEl.value);
+                if (isNaN(amount) || amount <= 0) {
+                    hasError = true;
+                    amountEl.style.borderColor = 'var(--danger)';
+                    return;
+                }
+                amountEl.style.borderColor = '';
+                transactions.push({
+                    personId: row.dataset.id,
+                    type: row.querySelector('.bulk-type').value,
+                    amount,
+                    category: row.querySelector('.bulk-cat').value,
+                    notes: commonNotes,
+                    date
+                });
+            });
+
+            if (transactions.length === 0) { showToast('Select at least one member with a valid amount.', 'error'); return; }
+            if (hasError) { showToast('Some rows have invalid amounts. Please fix them.', 'error'); return; }
+
+            setBusy(submitBulkBtn, true, '<i class="fas fa-spinner fa-spin"></i> Processing...');
+            const result = await safe(api('POST', '/transactions/bulk', { transactions }));
+            setBusy(submitBulkBtn, false);
+            if (result && result.success) {
+                showToast(result.message || 'Transactions added.', 'success');
+                $$('.bulk-amount').forEach(el => el.value = '');
+                if (commonNotesInput) commonNotesInput.value = '';
+                updateBulkTotal();
+                fetchDashboard();
+            }
+        }
+
+        // ============================================================
+        //  SINGLE TRANSACTION
+        // ============================================================
+        function setType(type) {
+            txType.value = type;
+            const isDebit = type === 'Debit';
+            typeDebitBtn.className = `toggle-btn ${isDebit ? 'active-debit' : ''}`;
+            typeCreditBtn.className = `toggle-btn ${!isDebit ? 'active-credit' : ''}`;
+            $('#categoryGroup').style.display = isDebit ? 'block' : 'none';
+            submitBtn.innerHTML = isDebit
+                ? '<i class="fas fa-arrow-down"></i> Add Debit'
+                : '<i class="fas fa-arrow-up"></i> Add Top-Up';
+        }
+
+        function handleCategoryChange() {
+            if (txCategory.value === 'Others') {
+                otherCategoryWrapper.classList.add('show');
+                txOtherCategory.setAttribute('required', 'required');
+            } else {
+                otherCategoryWrapper.classList.remove('show');
+                txOtherCategory.removeAttribute('required');
+                txOtherCategory.value = '';
+            }
+        }
+
+        async function submitSingleTransaction() {
+            const data = {
+                personId: txPerson.value,
+                type: txType.value,
+                amount: parseFloat(txAmount.value),
+                notes: txNotes.value.trim(),
+                date: txDate.value || getTodayStr()
+            };
+            if (!data.personId) { showToast('Please select a person.', 'error'); return; }
+            if (data.type === 'Debit') {
+                let cat = txCategory.value;
+                if (cat === 'Others') {
+                    const custom = txOtherCategory.value.trim();
+                    if (!custom) { showToast('Please enter a custom category name.', 'error'); return; }
+                    cat = custom;
+                }
+                data.category = cat;
+            } else {
+                data.category = 'Top Up';
+            }
+            if (!data.amount || data.amount <= 0) { showToast('Please enter a valid amount.', 'error'); return; }
+
+            setBusy(submitBtn, true, '<i class="fas fa-spinner fa-spin"></i> Adding...');
+            const result = await safe(api('POST', '/transactions', data));
+            setBusy(submitBtn, false);
+            if (result && result.success) {
+                showToast(result.message || 'Transaction added.', 'success');
+                txForm.reset();
+                txDate.value = getTodayStr();
+                setType('Debit');
+                handleCategoryChange();
+                fetchDashboard();
+                setTimeout(() => switchTab('dashboard'), 400);
+            }
+        }
+
+        // ============================================================
+        //  SETTINGS: MEMBERS (admin manages; everyone can view)
+        // ============================================================
+        function renderSettingsMembers() {
+            if (members.length === 0) {
+                settingsMemberList.innerHTML = `<div class="empty-state" style="padding:16px 0;"><p style="font-size:13px;">No members added yet.</p></div>`;
+                return;
+            }
+            let html = '<div class="settings-member-list">';
+            members.forEach(m => {
+                const isSelf = currentUser && m.id === currentUser.id;
+                const admin = isAdmin();
+                html += `
+                    <div class="settings-member-item">
+                        <span class="name">
+                            <i class="fas fa-user" style="color:${getColorForName(m.name)};margin-right:8px;"></i>${escapeHtml(m.name)}
+                            <span class="role-badge ${m.role === 'admin' ? 'admin' : ''}">${m.role === 'admin' ? 'Admin' : 'Member'}</span>
+                            ${isSelf ? '<span class="role-badge">You</span>' : ''}
+                        </span>
+                        ${admin ? `
+                        <div style="display:flex;gap:6px;">
+                            <button class="edit-btn btn btn-outline btn-sm" data-id="${escapeHtml(m.id)}" style="padding:4px 8px;font-size:12px;">
+                                <i class="fas fa-pen"></i> Edit
+                            </button>
+                            <button class="del-btn btn btn-outline btn-sm" data-id="${escapeHtml(m.id)}" ${isSelf ? 'disabled style="opacity:0.35;cursor:not-allowed;padding:4px 8px;font-size:12px;"' : 'style="padding:4px 8px;font-size:12px;color:var(--danger);border-color:var(--danger);"'} aria-label="Delete ${escapeHtml(m.name)}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>` : ''}
+                    </div>`;
+            });
+            html += '</div>';
+            settingsMemberList.innerHTML = html;
+
+            settingsMemberList.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => openEditMember(btn.dataset.id));
+            });
+            settingsMemberList.querySelectorAll('.del-btn:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const m = members.find(x => x.id === btn.dataset.id);
+                    if (!m || !confirm(`Remove "${m.name}"? Their past transactions are kept, but they can no longer sign in.`)) return;
+                    const result = await safe(api('DELETE', '/members/' + encodeURIComponent(m.id)));
+                    if (result && result.success) {
+                        showToast(result.message || 'Member removed.', 'success');
+                        loadAll();
+                    }
+                });
+            });
+        }
+
+        // ----- Add member -----
+        $('#openAddMemberBtn').addEventListener('click', () => {
+            $('#addMemberForm').reset();
+            showOverlay('addMemberModal');
+            $('#newName').focus();
+        });
+
+        $('#addMemberForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = $('#newName').value.trim();
+            const username = $('#newUsername').value.trim().toLowerCase();
+            const password = $('#newPassword').value;
+            const role = $('#newRole').value;
+            if (!name) { showToast('Please enter a name.', 'error'); return; }
+            if (!validUsername(username)) { showToast('Username: 3–30 letters, numbers, dot, dash or underscore.', 'error'); return; }
+            if (password.length < 8) { showToast('Password must be at least 8 characters.', 'error'); return; }
+            if (members.some(m => m.name.toLowerCase() === name.toLowerCase())) { showToast(`"${name}" already exists.`, 'error'); return; }
+
+            const btn = $('#addMemberSubmitBtn');
+            setBusy(btn, true, '<i class="fas fa-spinner fa-spin"></i> Adding...');
+            const result = await safe(api('POST', '/members', { name, username, password, role }));
+            setBusy(btn, false);
+            if (result && result.success) {
+                hideOverlay('addMemberModal');
+                $('#addMemberForm').reset();
+                showToast(result.message || 'Member added.', 'success');
+                loadAll();
+            }
+        });
+
+        // ----- Edit member -----
+        function openEditMember(id) {
+            const m = members.find(x => x.id === id);
+            if (!m) return;
+            const isSelf = currentUser && m.id === currentUser.id;
+            $('#editId').value = m.id;
+            $('#editName').value = m.name;
+            $('#editRole').value = m.role;
+            $('#editPassword').value = '';
+            $('#editMemberSub').textContent = `@${m.username}`;
+            // An admin can't demote themselves (prevents locking everyone out)
+            $('#editRoleGroup').classList.toggle('hidden', isSelf);
+            showOverlay('editMemberModal');
+        }
+
+        $('#editMemberForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = $('#editId').value;
+            const name = $('#editName').value.trim();
+            const role = $('#editRole').value;
+            const password = $('#editPassword').value;
+            if (!name) { showToast('Please enter a name.', 'error'); return; }
+            if (password && password.length < 8) { showToast('Password must be at least 8 characters.', 'error'); return; }
+
+            const payload = { name };
+            if (!$('#editRoleGroup').classList.contains('hidden')) payload.role = role;
+            if (password) payload.password = password;
+
+            const btn = $('#editMemberSubmitBtn');
+            setBusy(btn, true, '<i class="fas fa-spinner fa-spin"></i> Saving...');
+            const result = await safe(api('PUT', '/members/' + encodeURIComponent(id), payload));
+            setBusy(btn, false);
+            if (result && result.success) {
+                if (currentUser && currentUser.id === id) {
+                    currentUser.name = name;
+                    $('#accName').textContent = name;
+                }
+                hideOverlay('editMemberModal');
+                showToast(result.message || 'Member updated.', 'success');
+                loadAll();
+                if (currentTab === 'history') fetchHistory();
+            }
+        });
+
+        // ----- Change my password -----
+        $('#openPasswordBtn').addEventListener('click', () => {
+            $('#passwordForm').reset();
+            showOverlay('passwordModal');
+            $('#pwCurrent').focus();
+        });
+
+        $('#passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentPassword = $('#pwCurrent').value;
+            const newPassword = $('#pwNew').value;
+            const confirmPw = $('#pwConfirm').value;
+            if (newPassword.length < 8) { showToast('New password must be at least 8 characters.', 'error'); return; }
+            if (newPassword !== confirmPw) { showToast('New passwords do not match.', 'error'); return; }
+            if (newPassword === currentPassword) { showToast('New password must be different.', 'error'); return; }
+
+            const btn = $('#passwordSubmitBtn');
+            setBusy(btn, true, '<i class="fas fa-spinner fa-spin"></i> Updating...');
+            const result = await safe(api('POST', '/auth/change-password', { currentPassword, newPassword }));
+            setBusy(btn, false);
+            if (result && result.success) {
+                hideOverlay('passwordModal');
+                $('#passwordForm').reset();
+                showToast(result.message || 'Password updated.', 'success');
+            }
+        });
+
+        // ============================================================
+        //  TAB SWITCHING
+        // ============================================================
+        function switchTab(tabId, force) {
+            if (currentTab === tabId && !force) return;
+            currentTab = tabId;
+            if (isBulkDeleteMode) exitHistoryBulkMode();
+            Object.keys(tabs).forEach(key => tabs[key].classList.toggle('active', key === tabId));
+            navBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+            if (!currentUser) return;
+
+            if (tabId === 'dashboard') {
+                fetchDashboard();
+            } else if (tabId === 'settings') {
+                loadMembers();
+            } else if (tabId === 'history') {
+                populateFilterDropdown();
+                if (!filterDate.value) filterDate.value = getTodayStr();
+                fetchHistory();
+            } else if (tabId === 'transaction') {
+                populateMemberDropdowns();
+                if (!txDate.value) txDate.value = getTodayStr();
+                if (!bulkDate.value) bulkDate.value = getTodayStr();
+                renderBulkTable();
+            }
+        }
+
+        // ============================================================
+        //  HISTORY
+        // ============================================================
+        function canDeleteTx(tx) {
+            return isAdmin() || (currentUser && tx.registrarId === currentUser.id);
+        }
+
+        async function fetchHistory() {
+            const params = new URLSearchParams();
+            if (filterPerson.value) params.set('personId', filterPerson.value);
+            if (filterDate.value) params.set('date', filterDate.value);
+            params.set('limit', '200');
+            const data = await safe(api('GET', '/transactions?' + params.toString()));
+            if (!data) return;
+            renderHistory(data);
+        }
+
+        function renderHistory(transactions) {
+            currentHistoryData = transactions || [];
+            if (currentHistoryData.length === 0) {
+                historyContainer.innerHTML = `<div class="empty-state"><i class="fas fa-receipt"></i><p>No transactions match your filters.</p></div>`;
+                return;
+            }
+
+            let html = '<div class="history-list" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding-right:4px;">';
+            currentHistoryData.forEach(tx => {
+                const amountClass = tx.type === 'Credit' ? 'positive' : 'negative';
+                const sign = tx.type === 'Credit' ? '+' : '-';
+                const deletable = canDeleteTx(tx);
+                const isChecked = selectedTxIds.has(tx.id);
+                html += `
+                    <div class="history-item" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);">
+                        ${isBulkDeleteMode && deletable ? `
+                            <input type="checkbox" class="history-checkbox" data-id="${escapeHtml(tx.id)}" ${isChecked ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--danger);cursor:pointer;margin-right:10px;flex-shrink:0;">
+                        ` : ''}
+                        <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <span class="tx-person" style="font-weight:600;font-size:14px;">${escapeHtml(tx.person)}</span>
+                                <span style="font-size:10px;background:var(--card-bg);padding:1px 8px;border-radius:10px;border:1px solid var(--border);">${escapeHtml(tx.type)}</span>
+                                <span style="font-size:10px;color:var(--text-muted);">${escapeHtml(tx.category)}</span>
+                            </div>
+                            <div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;">
+                                <span><i class="far fa-calendar"></i> ${formatDate(tx.date)}</span>
+                                ${tx.time ? `<span><i class="far fa-clock"></i> ${escapeHtml(tx.time)}</span>` : ''}
+                                <span><i class="far fa-user"></i> ${escapeHtml(tx.registrar || 'System')}</span>
+                                ${tx.notes ? `<span><i class="far fa-note-sticky"></i> ${escapeHtml(tx.notes)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                            <span class="member-balance ${amountClass}" style="font-size:15px;">
+                                <span class="currency">₹</span>${sign}${Math.abs(tx.amount).toFixed(0)}
+                            </span>
+                            ${!isBulkDeleteMode && deletable ? `
+                                <button class="del-tx-btn" data-id="${escapeHtml(tx.id)}" style="background:none;border:none;color:var(--text-muted);font-size:16px;padding:6px 8px;cursor:pointer;border-radius:6px;touch-action:manipulation;" aria-label="Delete transaction">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>`;
+            });
+            html += '</div>';
+            historyContainer.innerHTML = html;
+
+            historyContainer.querySelectorAll('.del-tx-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const item = btn.closest('.history-item');
+                    const name = item ? item.querySelector('.tx-person').textContent : 'this transaction';
+                    if (!confirm(`Delete transaction for ${name}?`)) return;
+                    const result = await safe(api('DELETE', '/transactions/' + encodeURIComponent(btn.dataset.id)));
+                    if (result && result.success) {
+                        showToast(result.message || 'Transaction deleted.', 'success');
+                        fetchHistory();
+                        fetchDashboard();
+                    }
+                });
+            });
+
+            historyContainer.querySelectorAll('.history-checkbox').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (cb.checked) selectedTxIds.add(cb.dataset.id); else selectedTxIds.delete(cb.dataset.id);
+                    updateHistoryBulkCount();
+                });
+            });
+        }
+
+        // ----- Bulk delete -----
+        function selectableHistory() { return currentHistoryData.filter(canDeleteTx); }
+
+        function updateHistoryBulkCount() {
+            const count = selectedTxIds.size;
+            const totalVisible = selectableHistory().length;
+            bulkSelectionCount.textContent = `${count} ${count === 1 ? 'entry' : 'entries'} selected for deletion`;
+            confirmHistoryBulkDeleteBtn.disabled = count === 0;
+            if (totalVisible > 0 && count === totalVisible) {
+                selectAllHistoryBulk.checked = true; selectAllHistoryBulk.indeterminate = false;
+            } else if (count > 0 && count < totalVisible) {
+                selectAllHistoryBulk.checked = false; selectAllHistoryBulk.indeterminate = true;
+            } else {
+                selectAllHistoryBulk.checked = false; selectAllHistoryBulk.indeterminate = false;
+            }
+        }
+
+        function exitHistoryBulkMode() {
+            isBulkDeleteMode = false;
+            selectedTxIds.clear();
+            selectAllHistoryBulk.checked = false;
+            selectAllHistoryBulk.indeterminate = false;
+            historyBulkToolbar.style.display = 'none';
+            bulkDeleteModeBtn.style.display = 'inline-flex';
+            renderHistory(currentHistoryData);
+        }
+
+        bulkDeleteModeBtn.addEventListener('click', () => {
+            isBulkDeleteMode = true;
+            selectedTxIds.clear();
+            historyBulkToolbar.style.display = 'block';
+            bulkDeleteModeBtn.style.display = 'none';
+            updateHistoryBulkCount();
+            renderHistory(currentHistoryData);
+        });
+
+        selectAllHistoryBulk.addEventListener('change', function () {
+            if (this.checked) selectableHistory().forEach(tx => selectedTxIds.add(tx.id));
+            else selectedTxIds.clear();
+            $$('.history-checkbox').forEach(cb => cb.checked = this.checked);
+            updateHistoryBulkCount();
+        });
+
+        cancelHistoryBulkDeleteBtn.addEventListener('click', exitHistoryBulkMode);
+
+        confirmHistoryBulkDeleteBtn.addEventListener('click', async () => {
+            const ids = Array.from(selectedTxIds);
+            if (ids.length === 0) return;
+            if (!confirm(`Are you sure you want to delete ${ids.length} selected transaction(s)?`)) return;
+            setBusy(confirmHistoryBulkDeleteBtn, true, '<i class="fas fa-spinner fa-spin"></i> Deleting...');
+            const result = await safe(api('POST', '/transactions/bulk-delete', { ids }));
+            setBusy(confirmHistoryBulkDeleteBtn, false);
+            if (result && result.success) {
+                showToast(result.message || 'Transactions deleted.', 'success');
+                exitHistoryBulkMode();
+                fetchHistory();
+                fetchDashboard();
+            }
+        });
+
+        // ============================================================
+        //  EVENT BINDING
+        // ============================================================
+        navBtns.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+        $('#refreshBtn').addEventListener('click', async () => {
+            await loadAll();
+            if (currentTab === 'history') fetchHistory();
+            showToast('Refreshed', 'info', 1200);
+        });
+
+        $('#copyBalancesBtn').addEventListener('click', () => {
+            if (!dashboardData || !dashboardData.members || dashboardData.members.length === 0) {
+                showToast('No balances to copy.', 'error');
+                return;
+            }
+            let text = "☕ *Chaya Patt Balances*\n";
+            dashboardData.members.forEach(m => {
+                const bal = m.balance || 0;
+                const sign = bal > 0 ? '+' : '';
+                const status = bal > 0 ? '(Credit)' : bal < 0 ? '(Debt)' : '(Settled)';
+                text += `${m.name}: ₹${sign}${bal.toFixed(0)} ${status}\n`;
+            });
+            navigator.clipboard.writeText(text.trim())
+                .then(() => showToast('Balances copied to clipboard!', 'success'))
+                .catch(() => showToast('Failed to copy.', 'error'));
+        });
+
+        subTabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                subTabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const view = btn.dataset.view;
+                bulkView.classList.toggle('active', view === 'bulk');
+                singleView.classList.toggle('active', view === 'single');
+                if (view === 'bulk') renderBulkTable();
+            });
+        });
+
+        typeDebitBtn.addEventListener('click', () => setType('Debit'));
+        typeCreditBtn.addEventListener('click', () => setType('Credit'));
+        txCategory.addEventListener('change', handleCategoryChange);
+        txForm.addEventListener('submit', (e) => { e.preventDefault(); submitSingleTransaction(); });
+        submitBulkBtn.addEventListener('click', submitBulk);
+
+        filterPerson.addEventListener('change', fetchHistory);
+        filterDate.addEventListener('change', fetchHistory);
+        resetFilterBtn.addEventListener('click', () => {
+            filterPerson.value = '';
+            filterDate.value = getTodayStr();
+            fetchHistory();
+        });
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+        txDate.value = getTodayStr();
+        bulkDate.value = getTodayStr();
+        filterDate.value = getTodayStr();
+        filterPerson.value = '';
+        setType('Debit');
+        handleCategoryChange();
+        boot();
+
+        // Block double-tap zoom on iOS (kept from v1)
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, { passive: false });
+    </script>
+</body>
+</html>

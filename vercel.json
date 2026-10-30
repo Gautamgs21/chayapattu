@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { "source": "/api/auth/:action", "destination": "/api/auth?r=:action" },
+    { "source": "/api/members/:id", "destination": "/api/users?id=:id" },
+    { "source": "/api/members", "destination": "/api/users" },
+    { "source": "/api/transactions/bulk-delete", "destination": "/api/data?r=bulk-delete" },
+    { "source": "/api/transactions/bulk", "destination": "/api/data?r=bulk" },
+    { "source": "/api/transactions/:id", "destination": "/api/data?r=tx&id=:id" },
+    { "source": "/api/transactions", "destination": "/api/data?r=tx" },
+    { "source": "/api/dashboard", "destination": "/api/data?r=dashboard" }
+  ]
+}
